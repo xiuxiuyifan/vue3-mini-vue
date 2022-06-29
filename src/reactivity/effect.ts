@@ -12,8 +12,9 @@ class ReactiveEffect {
 
   run() {
     activeEffect = this;
-    this._fn();
+    let r = this._fn();
     activeEffect = null;
+    return r;
   }
 }
 // 存储依赖信息   target key  fn1, fn2
@@ -55,4 +56,6 @@ export function effect(fn) {
 
   // 调用effect 传递的这个函数
   _effect.run();
+  // 把 run 函数返回出去
+  return _effect.run.bind(_effect);
 }
