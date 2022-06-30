@@ -13,7 +13,7 @@ class ReactiveEffect {
   run() {
     activeEffect = this;
     let r = this._fn();
-    // activeEffect = null;
+    // activeEffect = null;  ???????
     return r;
   }
 }
