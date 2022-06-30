@@ -6,14 +6,14 @@ let activeEffect: any = null;
 class ReactiveEffect {
   private _fn: any;
 
-  constructor(fn: any) {
+  constructor(fn: any, public scheduler?) {
     this._fn = fn;
   }
 
   run() {
     activeEffect = this;
     let r = this._fn();
-    activeEffect = null;
+    // activeEffect = null;
     return r;
   }
 }
@@ -47,12 +47,16 @@ export function trigger(target, key) {
   let dep = depsMap.get(key);
 
   for (const effect of dep) {
-    effect.run();
+    if (effect.scheduler) {
+      effect.scheduler();
+    } else {
+      effect.run();
+    }
   }
 }
 
-export function effect(fn) {
-  const _effect = new ReactiveEffect(fn);
+export function effect(fn, options: any = {}) {
+  const _effect = new ReactiveEffect(fn, options.scheduler);
 
   // 调用effect 传递的这个函数
   _effect.run();
