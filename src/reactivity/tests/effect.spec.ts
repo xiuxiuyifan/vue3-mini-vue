@@ -1,5 +1,5 @@
 import { reactive } from "../reactive";
-import { effect } from "../effect";
+import { effect, stop } from "../effect";
 describe("effect", () => {
   it("should observed basic properties", () => {
     let dummy: any;
@@ -75,5 +75,45 @@ describe("effect", () => {
 
     // 首先给 effect 添加第二个参数
     // 其次 当响应式数据 set 的时候，检测如果有scheduler 则执行 scheduler 函数， 不再触发更新
+  });
+
+  it("stop", () => {
+    let dummy: any;
+
+    const obj = reactive({ foo: 1 });
+
+    const runner = effect(() => {
+      dummy = obj.foo;
+    });
+    obj.foo = 2;
+
+    expect(dummy).toBe(2);
+
+    stop(runner);
+
+    obj.foo = 3;
+    expect(dummy).toBe(2);
+  });
+
+  // 调用stop 之后的回调函数
+  it("onStop", () => {
+    const obj = reactive({ foo: 1 });
+    const onStop = jest.fn();
+
+    let dummy: any;
+    const runner = effect(
+      () => {
+        dummy = obj.foo;
+      },
+      {
+        onStop,
+      }
+    );
+
+    stop(runner);
+
+    // 判断 onStop 是否被调用？
+
+    expect(onStop).toBeCalledTimes(1);
   });
 });
