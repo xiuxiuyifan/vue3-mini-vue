@@ -1,4 +1,4 @@
-import { reactive, readonly } from "../reactive";
+import { isReactive, reactive, readonly, isReadonly } from "../reactive";
 
 describe("reactive", () => {
   it("Object", () => {
@@ -28,5 +28,25 @@ describe("reactive", () => {
     // set
     obj.foo = 2;
     expect(console.warn).toBeCalled();
+  });
+
+  it("test isReactive", () => {
+    const original = { foo: 1 };
+    const obj = reactive(original);
+
+    expect(original).not.toBe(obj);
+    expect(obj.foo).toBe(1);
+    expect(isReactive(original)).toBe(false);
+    expect(isReactive(obj)).toBe(true);
+  });
+
+  it("test isReadonly", () => {
+    const original = { foo: 1 };
+    const obj = readonly(original);
+
+    expect(original).not.toBe(obj);
+    expect(obj.foo).toBe(1);
+    expect(isReadonly(obj)).toBe(true);
+    expect(isReadonly(original)).toBe(false);
   });
 });
