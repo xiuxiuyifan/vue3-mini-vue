@@ -31,6 +31,7 @@ class ReactiveEffect {
   }
 
   stop() {
+    // 外部用户如果调用多次，也只会清空一次
     if (this.active) {
       // 清空依赖信息, 清空这个 effect 上面的依赖信息
       cleanupEffect(this);

@@ -1,4 +1,4 @@
-import { reactive } from "../reactive";
+import { reactive, readonly } from "../reactive";
 
 describe("reactive", () => {
   it("Object", () => {
@@ -15,5 +15,18 @@ describe("reactive", () => {
 
     // ownKeys
     expect(Object.keys(observed)).toEqual(["foo"]);
+  });
+
+  it("readonly", () => {
+    let original = { foo: 1 };
+    console.warn = jest.fn();
+    const obj = readonly(original);
+
+    expect(obj).not.toBe(original);
+    expect(obj.foo).toBe(1);
+
+    // set
+    obj.foo = 2;
+    expect(console.warn).toBeCalled();
   });
 });
