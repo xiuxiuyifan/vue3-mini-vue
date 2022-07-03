@@ -2,6 +2,7 @@ import { add } from "../index";
 import { extend } from "../shared/index";
 // 记录正在执行的effect
 let activeEffect: any = null;
+let shouldTrack = false;
 
 // 包装依赖信息
 class ReactiveEffect {
@@ -23,9 +24,14 @@ class ReactiveEffect {
     if (!this.active) {
       return this._fn();
     }
+    // 可以进行收集依赖了
+    shouldTrack = true;
+
     // 记录全局正在执行的依赖
     activeEffect = this;
     let r = this._fn();
+    //重置
+    shouldTrack = false;
     // activeEffect = null; //???????
     return r;
   }
@@ -53,6 +59,10 @@ function cleanupEffect(effect: any) {
 const targetMap = new Map();
 
 export function track(target: any, key: any) {
+  // 如果没有正在激活的effect，那么不需要收集依赖
+  if (!activeEffect) return;
+  // 如果不需要收集依赖，那么不需要收集依赖
+  if (!shouldTrack) return;
   let depsMap = targetMap.get(target);
 
   // 根据 target 取出 target对象的依赖
@@ -67,7 +77,6 @@ export function track(target: any, key: any) {
     dep = new Set();
     depsMap.set(key, dep);
   }
-  if (!activeEffect) return;
   // 把依赖添加到 dep 的 set 中
   dep.add(activeEffect);
 

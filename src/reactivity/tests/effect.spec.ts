@@ -116,4 +116,16 @@ describe("effect", () => {
 
     expect(onStop).toBeCalledTimes(1);
   });
+
+  it("enhanced stop", () => {
+    let dummy: any;
+    const obj = reactive({ foo: 1 });
+    const runner = effect(() => {
+      dummy = obj.foo;
+    });
+
+    stop(runner);
+    obj.foo++;
+    expect(dummy).toBe(1);
+  });
 });
