@@ -1,5 +1,9 @@
 import { track, trigger } from "./effect";
-import { readonlyHandler, reactiveHandler } from "./baseHandlers";
+import {
+  readonlyHandler,
+  reactiveHandler,
+  shallowReadonlyHandler,
+} from "./baseHandlers";
 
 export enum ReactiveFlag {
   IS_REACTIVE_FLAG = "__v__isReactive",
@@ -12,6 +16,10 @@ export function reactive(raw) {
 
 export function readonly(raw: any) {
   return new Proxy(raw, readonlyHandler);
+}
+
+export function shallowReadonly(raw: any) {
+  return new Proxy(raw, shallowReadonlyHandler);
 }
 
 export function isReactive(value: any) {
