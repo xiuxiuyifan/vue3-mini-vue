@@ -1,5 +1,6 @@
+import { isObject } from "../shared";
 import { track, trigger } from "./effect";
-import { ReactiveFlag } from "./reactive";
+import { reactive, ReactiveFlag, readonly } from "./reactive";
 
 function createGetter(isReadonly = false) {
   return function get(target, key, receiver) {
@@ -13,6 +14,10 @@ function createGetter(isReadonly = false) {
     //先读，再依赖收集
     if (!isReadonly) {
       track(target, key);
+    }
+    //如果得到的是对象，那么还需要递归
+    if (isObject(res)) {
+      return isReadonly ? readonly(res) : reactive(res);
     }
     return res;
   };

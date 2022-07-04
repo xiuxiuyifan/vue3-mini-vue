@@ -49,4 +49,42 @@ describe("reactive", () => {
     expect(isReadonly(obj)).toBe(true);
     expect(isReadonly(original)).toBe(false);
   });
+
+  it("deep reactive", () => {
+    const original = {
+      foo: {
+        bar: 1,
+      },
+      array: [{ bar: 2 }],
+    };
+    const obj = reactive(original);
+
+    // 检测里面的 对象是不是一个 reactive对象
+    expect(isReactive(obj.foo)).toBe(true);
+
+    expect(isReactive(obj.array)).toBe(true);
+
+    expect(isReactive(obj.array[0])).toBe(true);
+  });
+
+  it("deep readonly", () => {
+    const original = {
+      foo: {
+        bar: 1,
+      },
+      array: [
+        {
+          var: 10,
+        },
+      ],
+    };
+
+    let obj = readonly(original);
+
+    expect(isReadonly(obj.foo)).toBe(true);
+
+    expect(isReadonly(obj.array)).toBe(true);
+
+    expect(isReadonly(obj.array[0])).toBe(true);
+  });
 });
