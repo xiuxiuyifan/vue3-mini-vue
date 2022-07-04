@@ -4,6 +4,7 @@ import {
   readonly,
   isReadonly,
   shallowReadonly,
+  isProxy,
 } from "../reactive";
 
 describe("reactive", () => {
@@ -105,5 +106,17 @@ describe("reactive", () => {
     expect(isReadonly(obj)).toBe(true);
 
     expect(isReadonly(obj.n)).toBe(false);
+  });
+
+  it("isProxy", () => {
+    const original = {
+      foo: 1,
+    };
+    const obj = reactive(original);
+
+    const readonlyObj = readonly({ value: 100 });
+
+    expect(isProxy(obj)).toBe(true);
+    expect(isProxy(readonlyObj)).toBe(true);
   });
 });
