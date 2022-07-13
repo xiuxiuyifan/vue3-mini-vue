@@ -1,4 +1,4 @@
-import { ref } from "../ref";
+import { isRef, ref, unRef } from "../ref";
 import { effect } from "../effect";
 
 describe("ref", () => {
@@ -43,5 +43,17 @@ describe("ref", () => {
     foo.value.bar = 2;
 
     expect(dummy).toBe(2);
+  });
+
+  it("isRef", () => {
+    const foo = ref(1);
+    expect(isRef(2)).toBe(false);
+    expect(isRef(foo)).toBe(true);
+  });
+
+  it("unRef", () => {
+    const foo = ref(1);
+    expect(unRef(foo)).toBe(1);
+    expect(unRef(1)).toBe(1);
   });
 });
