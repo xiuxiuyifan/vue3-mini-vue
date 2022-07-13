@@ -32,7 +32,7 @@ class ReactiveEffect {
     let r = this._fn();
     //重置
     shouldTrack = false;
-    // activeEffect = null; //???????
+    activeEffect = null; //???????
     return r;
   }
 
@@ -77,11 +77,17 @@ export function track(target: any, key: any) {
     dep = new Set();
     depsMap.set(key, dep);
   }
-  // 把依赖添加到 dep 的 set 中
-  dep.add(activeEffect);
+  trackEffects(dep);
+}
 
-  // dep 用来存放 effect
-  activeEffect.deps.push(dep);
+export function trackEffects(dep: any) {
+  if (!activeEffect) return;
+  if (!dep.has(activeEffect)) {
+    // 把依赖添加到 dep 的 set 中
+    dep.add(activeEffect);
+    // dep 用来存放 effect
+    activeEffect.deps.push(dep);
+  }
 }
 
 // 找出依赖信息依次执行
@@ -90,7 +96,10 @@ export function trigger(target, key) {
   if (!depsMap) return;
 
   let dep = depsMap.get(key);
+  triggerEffects(dep);
+}
 
+export function triggerEffects(dep) {
   for (const effect of dep) {
     if (effect.scheduler) {
       effect.scheduler();
