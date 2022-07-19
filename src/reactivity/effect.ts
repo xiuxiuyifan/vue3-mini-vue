@@ -5,7 +5,7 @@ let activeEffect: any = null;
 let shouldTrack = false;
 
 // 包装依赖信息
-class ReactiveEffect {
+export class ReactiveEffect {
   private _fn: any;
   active = true;
 
