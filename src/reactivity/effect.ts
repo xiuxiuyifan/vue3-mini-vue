@@ -1,4 +1,3 @@
-import { add } from "../index";
 import { extend } from "../shared/index";
 // 记录正在执行的effect
 let activeEffect: any = null;

@@ -5,6 +5,9 @@ export function render(vnode, container) {
 }
 
 function patch(vnode, container) {
+  // 需要判断当前的 vnode 是不是 element
+  // 如果是一个 element 的话就应该处理 element
+  // 如何区分是 组件类型还是 element 类型？？
   // 处理组件
   processComponent(vnode, container);
 }
