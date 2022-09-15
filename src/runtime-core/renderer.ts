@@ -28,8 +28,9 @@ function mountComponent(vnode: any, container: any) {
 }
 
 function setupRenderEffect(instance, container) {
+  const { proxy } = instance;
   // 拿到组件内部  render 函数返回的虚拟节点
-  const subTree = instance.render();
+  const subTree = instance.render.call(proxy);
 
   // vnode -> patch
   // vnode -> element -> mountElement
