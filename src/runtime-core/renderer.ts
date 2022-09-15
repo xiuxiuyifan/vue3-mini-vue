@@ -20,14 +20,19 @@ function processComponent(vnode: any, container: any) {
   mountComponent(vnode, container);
 }
 
-function mountComponent(vnode: any, container: any) {
-  const instance = createComponentInstance(vnode);
+/**
+ *
+ * @param initialVNode 初始化组件的 vnode
+ * @param container
+ */
+function mountComponent(initialVNode: any, container: any) {
+  const instance = createComponentInstance(initialVNode);
 
   setupComponent(instance);
-  setupRenderEffect(instance, container);
+  setupRenderEffect(instance, initialVNode, container);
 }
 
-function setupRenderEffect(instance, container) {
+function setupRenderEffect(instance, initialVNode, container) {
   const { proxy } = instance;
   // 拿到组件内部  render 函数返回的虚拟节点
   const subTree = instance.render.call(proxy);
@@ -35,6 +40,8 @@ function setupRenderEffect(instance, container) {
   // vnode -> patch
   // vnode -> element -> mountElement
   patch(subTree, container);
+  // 把根节点的 el 赋值给组件的虚拟节点
+  initialVNode.el = subTree.el;
 }
 
 // 处理元素
@@ -44,14 +51,13 @@ function processElement(vnode: any, container: any) {
 
 // 挂载元素
 function mountElement(vnode: any, container: any) {
-  const el = document.createElement(vnode.type);
+  const el = (vnode.el = document.createElement(vnode.type));
 
   // vnode.children 可能是 string 也可能是数组
   const { children } = vnode;
   if (typeof children === "string") {
     el.textContent = children;
   } else if (Array.isArray(children)) {
-    debugger;
     mountChildren(vnode, el);
   }
 
