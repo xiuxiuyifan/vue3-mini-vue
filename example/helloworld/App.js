@@ -10,7 +10,7 @@ const App = {
 
   setup() {
     return {
-      msg: 'hello world -'
+      msg: 'hello world -7777'
     }
   }
 }
