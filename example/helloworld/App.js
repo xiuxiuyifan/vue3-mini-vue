@@ -5,12 +5,19 @@ const App = {
   render() {
     console.log(this)
     window.self = this
-    return h('div', {}, this.msg)
+    return h('div', {
+      onClick() {
+        console.log('click')
+      },
+      onMousedown() {
+        console.log('mousedown')
+      }
+    }, this.msg)
   },
 
   setup() {
     return {
-      msg: 'hello world -7777'
+      msg: 'hello world -'
     }
   }
 }
