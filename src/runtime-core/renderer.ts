@@ -65,7 +65,6 @@ function mountElement(vnode: any, container: any) {
 
   // props
   const { props } = vnode;
-  console.log(props);
   for (let key in props) {
     let val = props[key];
     const isOn = (key: string) => /^on[A-Z]/.test(key);
