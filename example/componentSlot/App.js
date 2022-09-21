@@ -9,8 +9,8 @@ const App = {
     const app = h('div', {}, "App")
     // 把组件的孩子渲染在 组件里面
     const foo = h(Foo, {}, {
-      header: h('p', {}, 'header'),
-      footer: h('p', {}, 'footer')
+      header: ({ age }) => h('p', {}, 'header' + age),
+      footer: () => h('p', {}, 'footer')
     })
 
     return h('div', {}, [

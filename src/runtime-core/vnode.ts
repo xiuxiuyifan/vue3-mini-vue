@@ -15,6 +15,13 @@ export function createVnode(type, props?, children?) {
   } else if (Array.isArray(vnode.children)) {
     vnode.shapeFlag |= ShapeFlags.ARRAY_CHILDREN;
   }
+
+  // 如果是有状态组件 并且 children 是 object 那么就是 slot children
+  if (vnode.shapeFlag & ShapeFlags.STATEFUL_COMPONENT) {
+    if (typeof children === "object") {
+      vnode.shapeFlag = ShapeFlags.SLOT_CHILDREN;
+    }
+  }
   return vnode;
 }
 

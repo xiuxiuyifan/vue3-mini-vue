@@ -5,8 +5,9 @@ const Foo = {
     return {}
   },
   render() {
+    const age = 18
     const foo = h('p', {}, 'foo')
-    return h('div', {}, [renderSlots(this.$slots, 'header'), foo, renderSlots(this.$slots, 'footer')])
+    return h('div', {}, [renderSlots(this.$slots, 'header', { age }), foo, renderSlots(this.$slots, 'footer')])
   }
 }
 
