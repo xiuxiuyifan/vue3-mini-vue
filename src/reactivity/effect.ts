@@ -52,10 +52,11 @@ function cleanupEffect(effect: any) {
   effect.deps.forEach((dep: any) => {
     dep.delete(effect);
   });
+  effect.deps.length = 0;
 }
 
 // 存储依赖信息   target key  fn1, fn2
-const targetMap = new Map();
+const targetMap = new WeakMap();
 
 export function track(target: any, key: any) {
   // 如果没有正在激活的effect，那么不需要收集依赖
