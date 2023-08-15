@@ -1,16 +1,16 @@
-import { h, renderSlots } from "../../lib/vue3-mini-vue.esm.js"
+import { h, renderSlots } from "../../lib/vue3-mini-vue.esm.js";
 
-const Foo = {
+export const Foo = {
   setup() {
-    return {}
+    return {};
   },
   render() {
-    const age = 18
-    const foo = h('p', {}, 'foo')
-    return h('div', {}, [renderSlots(this.$slots, 'header', { age }), foo, renderSlots(this.$slots, 'footer')])
-  }
-}
-
-export {
-  Foo
-}
+    const age = 18;
+    const foo = h("p", {}, "foo");
+    return h("div", {}, [
+      renderSlots(this.$slots, "header", { age }),
+      foo,
+      renderSlots(this.$slots, "footer"),
+    ]);
+  },
+};
