@@ -38,9 +38,11 @@ function setupStatefulComponent(instance: any) {
   const { setup } = component;
 
   if (setup) {
+    setCurrentInstance(instance);
     const setupResult = setup(shallowReadonly(instance.props), {
       emit: instance.emit,
     });
+    setCurrentInstance(null);
 
     // 如果 setup 函数返回的是一个函数，则其就是当前组件的render函数
     // 如果是 对象，则就是返回的  render 函数里面的数据
@@ -60,4 +62,14 @@ function handleSetupResult(instance, setupResult: any) {
 function finishComponentSetup(instance: any) {
   const component = instance.type;
   instance.render = component.render;
+}
+
+let currentInstance = null;
+
+export function getCurrentInstance() {
+  return currentInstance;
+}
+
+export function setCurrentInstance(instance) {
+  currentInstance = instance;
 }
