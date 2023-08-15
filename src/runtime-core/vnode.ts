@@ -1,6 +1,9 @@
 import { ShapeFlags } from "../shared/shapeFlag";
 
-export function createVnode(type, props?, children?) {
+export const Fragment = Symbol("Fragment");
+export const Text = Symbol("Text");
+
+export function createVNode(type, props?, children?) {
   const vnode = {
     type,
     props,
@@ -23,6 +26,15 @@ export function createVnode(type, props?, children?) {
     }
   }
   return vnode;
+}
+
+/**
+ * 创建文本的虚拟节点
+ * @param text
+ * @returns
+ */
+export function createTextVNode(text: string) {
+  return createVNode(Text, {}, text);
 }
 
 // 如果 type 是 string 的话就表示 vnode 是一个元素  否则就是 有状态组件

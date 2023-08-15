@@ -1,5 +1,6 @@
 import { ShapeFlags } from "../shared/shapeFlag";
 import { createComponentInstance, setupComponent } from "./component";
+import { Fragment, Text } from "./vnode";
 
 export function render(vnode, container) {
   patch(vnode, container);
@@ -9,15 +10,45 @@ function patch(vnode, container) {
   // 需要判断当前的 vnode 是不是 element
   // 如果是一个 element 的话就应该处理 element
   // 如何区分是 组件类型还是 element 类型？？
-  const { shapeFlag } = vnode;
-  if (shapeFlag & ShapeFlags.ELEMENT) {
-    processElement(vnode, container);
-  } else if (shapeFlag & ShapeFlags.STATEFUL_COMPONENT) {
-    // 处理组件
-    processComponent(vnode, container);
+  const { type, shapeFlag } = vnode;
+  switch (type) {
+    case Fragment:
+      processFragment(vnode, container);
+      break;
+    case Text:
+      processText(vnode, container);
+      break;
+    default:
+      if (shapeFlag & ShapeFlags.ELEMENT) {
+        processElement(vnode, container);
+      } else if (shapeFlag & ShapeFlags.STATEFUL_COMPONENT) {
+        // 处理组件
+        processComponent(vnode, container);
+      }
+      break;
   }
 }
 
+/**
+ * 其实就是只把 children 渲染出来就行
+ * @param vnode
+ * @param container
+ */
+function processFragment(vnode, container) {
+  mountChildren(vnode, container);
+}
+
+/**
+ * 根据文本虚拟节点创建真实的文本节点
+ * @param vnode
+ * @param container
+ */
+function processText(vnode, container) {
+  // 取出文本内容
+  const { children } = vnode;
+  const textNode = (vnode.el = document.createTextNode(children));
+  container.append(textNode);
+}
 function processComponent(vnode: any, container: any) {
   mountComponent(vnode, container);
 }
