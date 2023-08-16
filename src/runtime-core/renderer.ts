@@ -3,27 +3,28 @@ import { createComponentInstance, setupComponent } from "./component";
 import { Fragment, Text } from "./vnode";
 
 export function render(vnode, container) {
-  patch(vnode, container);
+  // patch 根组件的时候 父组件 为 null
+  patch(vnode, container, null);
 }
 
-function patch(vnode, container) {
+function patch(vnode, container, parentComponent) {
   // 需要判断当前的 vnode 是不是 element
   // 如果是一个 element 的话就应该处理 element
   // 如何区分是 组件类型还是 element 类型？？
   const { type, shapeFlag } = vnode;
   switch (type) {
     case Fragment:
-      processFragment(vnode, container);
+      processFragment(vnode, container, parentComponent);
       break;
     case Text:
       processText(vnode, container);
       break;
     default:
       if (shapeFlag & ShapeFlags.ELEMENT) {
-        processElement(vnode, container);
+        processElement(vnode, container, parentComponent);
       } else if (shapeFlag & ShapeFlags.STATEFUL_COMPONENT) {
         // 处理组件
-        processComponent(vnode, container);
+        processComponent(vnode, container, parentComponent);
       }
       break;
   }
@@ -34,8 +35,8 @@ function patch(vnode, container) {
  * @param vnode
  * @param container
  */
-function processFragment(vnode, container) {
-  mountChildren(vnode, container);
+function processFragment(vnode, container, parentComponent) {
+  mountChildren(vnode, container, parentComponent);
 }
 
 /**
@@ -49,8 +50,8 @@ function processText(vnode, container) {
   const textNode = (vnode.el = document.createTextNode(children));
   container.append(textNode);
 }
-function processComponent(vnode: any, container: any) {
-  mountComponent(vnode, container);
+function processComponent(vnode: any, container: any, parentComponent) {
+  mountComponent(vnode, container, parentComponent);
 }
 
 /**
@@ -58,8 +59,8 @@ function processComponent(vnode: any, container: any) {
  * @param initialVNode 初始化组件的 vnode
  * @param container
  */
-function mountComponent(initialVNode: any, container: any) {
-  const instance = createComponentInstance(initialVNode);
+function mountComponent(initialVNode: any, container: any, parentComponent) {
+  const instance = createComponentInstance(initialVNode, parentComponent);
 
   setupComponent(instance);
   setupRenderEffect(instance, initialVNode, container);
@@ -72,18 +73,18 @@ function setupRenderEffect(instance, initialVNode, container) {
 
   // vnode -> patch
   // vnode -> element -> mountElement
-  patch(subTree, container);
+  patch(subTree, container, instance);
   // 把根节点的 el 赋值给组件的虚拟节点
   initialVNode.el = subTree.el;
 }
 
 // 处理元素
-function processElement(vnode: any, container: any) {
-  mountElement(vnode, container);
+function processElement(vnode: any, container: any, parentComponent) {
+  mountElement(vnode, container, parentComponent);
 }
 
 // 挂载元素
-function mountElement(vnode: any, container: any) {
+function mountElement(vnode: any, container: any, parentComponent) {
   const el = (vnode.el = document.createElement(vnode.type));
 
   // vnode.children 可能是 string 也可能是数组
@@ -91,7 +92,7 @@ function mountElement(vnode: any, container: any) {
   if (shapeFlag & ShapeFlags.TEXT_CHILDREN) {
     el.textContent = children;
   } else if (shapeFlag & ShapeFlags.ARRAY_CHILDREN) {
-    mountChildren(vnode, el);
+    mountChildren(vnode, el, parentComponent);
   }
 
   // props
@@ -110,9 +111,9 @@ function mountElement(vnode: any, container: any) {
 }
 
 // 挂载孩子节点
-function mountChildren(vnode: any, container: any) {
+function mountChildren(vnode: any, container: any, parentComponent) {
   // 如果孩子是数组就，进行递归的调用，往刚才创建的 根节点下面添加新的元素
   vnode.children.forEach((v) => {
-    patch(v, container);
+    patch(v, container, parentComponent);
   });
 }
