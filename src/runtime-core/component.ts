@@ -3,6 +3,7 @@ import { PublicInstanceProxyHandlers } from "./componentPublicInstance";
 import { shallowReadonly } from "../reactivity/reactive";
 import { emit } from "./componentEmit";
 import { initSlots } from "./componentSlots";
+import { proxyRefs } from "src/reactivity";
 // 创建组件实例
 export function createComponentInstance(vnode, parent) {
   const component = {
@@ -15,6 +16,8 @@ export function createComponentInstance(vnode, parent) {
     // 取 父级的 provides 属性的值放到自己身上
     provides: parent ? parent.provides : {},
     parent,
+    inMounted: false,
+    subTree: {},
     emit: () => {},
   };
   component.emit = emit.bind(null, component) as any;
@@ -56,7 +59,8 @@ function setupStatefulComponent(instance: any) {
 // 处理 setup 函数的返回结果
 function handleSetupResult(instance, setupResult: any) {
   if (typeof setupResult === "object") {
-    instance.setupState = setupResult;
+    // 代理 组件 setup 返回的值
+    instance.setupState = proxyRefs(setupResult);
   }
 
   finishComponentSetup(instance);
