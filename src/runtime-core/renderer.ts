@@ -131,7 +131,7 @@ export function createRenderer(options) {
     const { props } = vnode;
     for (let key in props) {
       let val = props[key];
-      hostPatchProp(el, key, val);
+      hostPatchProp(el, key, null, val);
     }
     hostInsert(el, container);
   }
@@ -145,8 +145,35 @@ export function createRenderer(options) {
     console.log("patchElement");
     console.log("n1", n1);
     console.log("n2", n2);
+
+    let oldProps = n1.props || {};
+    let newProps = n2.props || {};
+
+    // 复用老元素 在同一个 DOM 上面打补丁
+    let el = (n2.el = n1.el);
+    // 在对比元素的时候对比 属性
+    patchProps(el, oldProps, newProps);
   }
 
+  function patchProps(el, oldProps, newProps) {
+    // 遍历新的属性
+    for (let key in newProps) {
+      const prevProp = oldProps[key];
+      const nextProp = newProps[key];
+      // 如果两者不相等就更新 新增或者修改
+      if (prevProp !== nextProp) {
+        hostPatchProp(el, key, prevProp, nextProp);
+      }
+    }
+    // 遍历老的节点
+    for (let key in oldProps) {
+      const prevProp = oldProps[key];
+      if (!(key in newProps)) {
+        // 新的中有，老的中没有则执行删除操作。
+        hostPatchProp(el, key, prevProp, null);
+      }
+    }
+  }
   // 挂载孩子节点
   function mountChildren(vnode: any, container: any, parentComponent) {
     // 如果孩子是数组就，进行递归的调用，往刚才创建的 根节点下面添加新的元素
