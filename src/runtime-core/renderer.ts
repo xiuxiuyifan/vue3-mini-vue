@@ -9,6 +9,8 @@ export function createRenderer(options) {
     createElement: hostCreateElement,
     patchProp: hostPatchProp,
     insert: hostInsert,
+    setElementText: hostSetElementText,
+    remove: hostRemove,
   } = options;
 
   function render(vnode, container) {
@@ -45,7 +47,7 @@ export function createRenderer(options) {
    * @param container
    */
   function processFragment(n1, n2, container, parentComponent) {
-    mountChildren(n2, container, parentComponent);
+    mountChildren(n2.children, container, parentComponent);
   }
 
   /**
@@ -111,7 +113,7 @@ export function createRenderer(options) {
     if (!n1) {
       mountElement(n2, container, parentComponent);
     } else {
-      patchElement(n1, n2, container);
+      patchElement(n1, n2, container, parentComponent);
     }
   }
 
@@ -124,7 +126,7 @@ export function createRenderer(options) {
     if (shapeFlag & ShapeFlags.TEXT_CHILDREN) {
       el.textContent = children;
     } else if (shapeFlag & ShapeFlags.ARRAY_CHILDREN) {
-      mountChildren(vnode, el, parentComponent);
+      mountChildren(vnode.children, el, parentComponent);
     }
 
     // props
@@ -141,7 +143,7 @@ export function createRenderer(options) {
    * @param n2
    * @param container
    */
-  function patchElement(n1, n2, container) {
+  function patchElement(n1, n2, container, parentComponent) {
     console.log("patchElement");
     console.log("n1", n1);
     console.log("n2", n2);
@@ -151,8 +153,55 @@ export function createRenderer(options) {
 
     // 复用老元素 在同一个 DOM 上面打补丁
     let el = (n2.el = n1.el);
+    // 对比孩子
+    patchChildren(n1, n2, el, parentComponent);
     // 在对比元素的时候对比 属性
     patchProps(el, oldProps, newProps);
+  }
+
+  function patchChildren(n1, n2, el, parentComponent) {
+    // 先拿到新节点的 vnode 和 shapeFlag
+    const prevShapeFlag = n1.shapeFlag;
+    const c1 = n1.children;
+    const { shapeFlag } = n2;
+    const c2 = n2.children;
+    // 新节点是 text
+    if (shapeFlag & ShapeFlags.TEXT_CHILDREN) {
+      // 老节点就只能有两种情况 text 或者 array
+      // 老节点是数组
+      if (prevShapeFlag & ShapeFlags.ARRAY_CHILDREN) {
+        // 卸载老儿子，并更新文本
+        unmountChildren(n1.children);
+      }
+      // 老节点是文本
+      if (c1 !== c2) {
+        // 如果不行等则直接更新
+        hostSetElementText(el, c2);
+      }
+    }
+    // 新节点是数组
+    else {
+      // 老节点是 text
+      if (prevShapeFlag & ShapeFlags.TEXT_CHILDREN) {
+        // 卸载老文本，挂载新节点
+        hostSetElementText(el, "");
+        // 挂载新儿子节点
+        mountChildren(c2, el, parentComponent);
+      } else {
+        console.log("diff 算法");
+      }
+    }
+  }
+
+  /**
+   * 删除一组儿子
+   * @param children
+   */
+  function unmountChildren(children) {
+    for (let i = 0; i < children.length; i++) {
+      const el = children[i].el;
+      hostRemove(el);
+    }
   }
 
   function patchProps(el, oldProps, newProps) {
@@ -175,9 +224,9 @@ export function createRenderer(options) {
     }
   }
   // 挂载孩子节点
-  function mountChildren(vnode: any, container: any, parentComponent) {
+  function mountChildren(children: any, container: any, parentComponent) {
     // 如果孩子是数组就，进行递归的调用，往刚才创建的 根节点下面添加新的元素
-    vnode.children.forEach((v) => {
+    children.forEach((v) => {
       patch(null, v, container, parentComponent);
     });
   }

@@ -24,10 +24,32 @@ function insert(el, parent) {
   parent.append(el);
 }
 
+/**
+ * 设置元素文本内容
+ * @param el
+ * @param text
+ */
+function setElementText(el, text) {
+  el.textContent = text;
+}
+
+/**
+ * 删除DOM 元素的子节点
+ * @param child
+ */
+function remove(child) {
+  const parent = child.parentNode;
+  if (parent) {
+    parent.removeChild(child);
+  }
+}
+
 const renderer: any = createRenderer({
   createElement,
   patchProp,
   insert,
+  setElementText,
+  remove,
 });
 
 export function createApp(...args) {
