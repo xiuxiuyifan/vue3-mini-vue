@@ -20,8 +20,14 @@ function patchProp(el, key, prevVal, nextVal) {
   }
 }
 
-function insert(el, parent) {
-  parent.append(el);
+/**
+ *
+ * @param child
+ * @param parent
+ * @param anchor 参照点位 null 的话就是向后插入，如果不为 null 的话，则表示向参照点前面插入新元素
+ */
+function insert(child, parent, anchor) {
+  parent.insertBefore(child, anchor || null);
 }
 
 /**
