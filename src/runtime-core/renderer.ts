@@ -281,7 +281,58 @@ export function createRenderer(options) {
         i++;
       }
     } else {
-      console.log("乱序对比");
+      console.log("中间对比");
+      let s1 = i;
+      let s2 = i;
+
+      // 将要对比的中间差异元素的个数
+      const toBePatched = e2 - s2 + 1;
+
+      // 新老节点相同的，已经深度patch过的元素
+      let patched = 0;
+
+      // 用新元素的 key 和下标构建一个 Map 对象
+      const keyToNewIndexMap = new Map();
+
+      // 遍历新元素中间剩余的
+      for (let i = s2; i <= e1; i++) {
+        const nextChild = c2[i];
+        keyToNewIndexMap.set(nextChild.key, i);
+      }
+
+      // 遍历老的元素，看老的元素是否在新的元素中出现。
+      for (let i = s1; i <= e1; i++) {
+        const prevChild = c1[i];
+
+        if (patched >= toBePatched) {
+          // 移除老的元素
+          hostRemove(prevChild.el);
+          continue;
+        }
+
+        let newIndex;
+        // 如果老的 vnode 里面有 key，则去新节点构建的 map 中去查找
+        // null 和 undefined
+        if (prevChild.key != null) {
+          newIndex = keyToNewIndexMap.get(prevChild.key);
+        } else {
+          // 如果没有可以，则进行双重循环对比 n²
+          // 遍历新的节点
+          for (let j = s2; j < s2; j++) {
+            if (isSameVNodeType(prevChild, e2[j])) {
+              newIndex = j;
+              break;
+            }
+          }
+        }
+        // 如果老节点在新节点中不存在，则将其移除掉
+        if (newIndex === undefined) {
+          hostRemove(prevChild.el);
+        } else {
+          patch(prevChild, c2[newIndex], container, parentComponent, null);
+          patched++;
+        }
+      }
     }
   }
 
