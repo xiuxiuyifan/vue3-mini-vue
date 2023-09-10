@@ -8,6 +8,8 @@ export function createVNode(type, props?, children?) {
     type,
     props,
     children,
+    // 虚拟节点上面添加 用来保存组件实例的属性
+    component: null,
     key: props && props.key,
     shapeFlag: getShapeFlag(type),
     el: null,
