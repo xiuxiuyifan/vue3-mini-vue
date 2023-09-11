@@ -4,6 +4,7 @@ import { createComponentInstance, setupComponent } from "./component";
 import { createAppAPI } from "./createApp";
 import { Fragment, Text } from "./vnode";
 import { shouldUpdateComponent } from "./componentUpdateUtils";
+import { queueJobs } from "./scheduler";
 
 export function createRenderer(options) {
   const {
@@ -114,40 +115,48 @@ export function createRenderer(options) {
 
   function setupRenderEffect(instance, initialVNode, container, anchor) {
     // 将副作用函保存到 组件实例身上
-    instance.update = effect(() => {
-      if (!instance.isMounted) {
-        console.log("初始化");
-        const { proxy } = instance;
-        // 拿到组件内部  render 函数返回的虚拟节点
-        const subTree = (instance.subTree = instance.render.call(proxy));
+    instance.update = effect(
+      () => {
+        if (!instance.isMounted) {
+          console.log("初始化");
+          const { proxy } = instance;
+          // 拿到组件内部  render 函数返回的虚拟节点
+          const subTree = (instance.subTree = instance.render.call(proxy));
 
-        // vnode -> patch
-        // vnode -> element -> mountElement
-        patch(null, subTree, container, instance, anchor);
-        // 把根节点的 el 赋值给组件的虚拟节点
-        initialVNode.el = subTree.el;
-        // 标记组件已经挂载完毕
-        instance.isMounted = true;
-      } else {
-        console.log("更新");
-        const { next, vnode } = instance;
-        if (next) {
-          next.el = vnode.el;
-          // 在组件 重新渲染之前先 根据新的 虚拟节点更新组件的信息，然后渲染的时候拿到的就是最新的组件信息了
-          updateComponentPreRender(instance, next);
+          // vnode -> patch
+          // vnode -> element -> mountElement
+          patch(null, subTree, container, instance, anchor);
+          // 把根节点的 el 赋值给组件的虚拟节点
+          initialVNode.el = subTree.el;
+          // 标记组件已经挂载完毕
+          instance.isMounted = true;
+        } else {
+          console.log("更新");
+          const { next, vnode } = instance;
+          if (next) {
+            next.el = vnode.el;
+            // 在组件 重新渲染之前先 根据新的 虚拟节点更新组件的信息，然后渲染的时候拿到的就是最新的组件信息了
+            updateComponentPreRender(instance, next);
+          }
+          const { proxy } = instance;
+          // 最新的 subTree
+          const subTree = instance.render.call(proxy);
+          // 获取老的 subTree
+          const prevSubTree = instance.subTree;
+          // 更新老的 subTree
+          instance.subTree = subTree;
+          console.log("prevSubTree", prevSubTree);
+          console.log("subTree", subTree);
+          patch(prevSubTree, subTree, container, instance, anchor);
         }
-        const { proxy } = instance;
-        // 最新的 subTree
-        const subTree = instance.render.call(proxy);
-        // 获取老的 subTree
-        const prevSubTree = instance.subTree;
-        // 更新老的 subTree
-        instance.subTree = subTree;
-        console.log("prevSubTree", prevSubTree);
-        console.log("subTree", subTree);
-        patch(prevSubTree, subTree, container, instance, anchor);
+      },
+      // 在数据发生变化的时候，不在自动执行  effect 函数，而是执行调度函数
+      {
+        scheduler() {
+          queueJobs(instance.update);
+        },
       }
-    });
+    );
   }
 
   // 处理元素
