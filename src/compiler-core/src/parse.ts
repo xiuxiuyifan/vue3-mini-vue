@@ -1,5 +1,10 @@
 import { NodeTypes } from "./ast";
 
+const enum TagType {
+  Start,
+  End,
+}
+
 /**
  *
  * @param content 接受 template 字符串
@@ -14,13 +19,49 @@ function parseChildren(context) {
   const nodes: any = [];
 
   let node;
+  const s = context.source;
   // 解析插值类型
-  if (context.source.startsWith("{{")) {
+  if (s.startsWith("{{")) {
     // 将 context 交给专门处理插值的函数进行处理
     node = parseInterpolation(context);
   }
+  // 元素类型  字符串的开头是 < 开始的
+  else if (s[0] === "<") {
+    // 再看第一个元素是不是 a-z
+    if (/[a-z]/i.test(s[1])) {
+      node = parseElement(context);
+    }
+  }
   nodes.push(node);
   return nodes;
+}
+
+// 解析 元素
+function parseElement(context: any) {
+  // 先处理元素的开始标签
+  const element = parseTag(context, TagType.Start);
+  // 在处理 元素的结束标签
+  parseTag(context, TagType.End);
+
+  return element;
+}
+
+function parseTag(context: any, type: TagType) {
+  // <div></div>
+  const match: any = /^<\/?([a-z]*)/i.exec(context.source);
+  // 拿到 捕获组里面的内容
+  const tag = match[1];
+  // 删掉已经匹配过的 字符串元素 <div   结束标签也是同理，会进这个逻辑的
+  advanceBy(context, match[0].length);
+  // 再删掉 >
+  advanceBy(context, 1);
+  // 如果遇到了结束标签，则直接退出
+  if (type === TagType.End) return;
+
+  return {
+    type: NodeTypes.ELEMENT,
+    tag,
+  };
 }
 
 /**
