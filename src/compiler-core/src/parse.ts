@@ -32,8 +32,32 @@ function parseChildren(context) {
       node = parseElement(context);
     }
   }
+
+  if (!node) {
+    node = parseText(context);
+  }
   nodes.push(node);
   return nodes;
+}
+
+function parseText(context: any) {
+  // 获取 content 内容
+  const content = parseTextData(context, context.source.length);
+
+  return {
+    type: NodeTypes.TEXT,
+    content,
+  };
+}
+
+// 获取 一定长度的字符串，并且向前推进
+function parseTextData(context: any, length) {
+  // 截取字符串的一部分
+  const content = context.source.slice(0, length);
+
+  // 向前推进
+  advanceBy(context, length);
+  return content;
 }
 
 // 解析 元素
@@ -86,11 +110,11 @@ function parseInterpolation(context) {
   // 拿到插值内容的长度
   const rawContentLength = closeIndex - openDelimiter.length;
   // 截取出 原始的差值内容
-  const rawContent = context.source.slice(0, rawContentLength);
+  const rawContent = parseTextData(context, rawContentLength);
   // 去除两端的空格
   const content = rawContent.trim();
   // 删除掉 已经处理过的位置的元素
-  advanceBy(context, rawContentLength + closeDelimiter.length);
+  advanceBy(context, closeDelimiter.length);
 
   // 返回出插值类型节点的 node
   return {
