@@ -3,11 +3,17 @@
  * @param root 根节点
  * @param options 传进来的配置参数
  */
-export function transform(root, options) {
+export function transform(root, options = {}) {
   // 创建一个遍历上下文对象
 
   const context = createTransformContext(root, options);
   traverseNode(root, context);
+  // 返回出用来 生成代码的 ast
+  createRootCodegen(root);
+}
+
+function createRootCodegen(root: any) {
+  root.codegenNode = root.children[0];
 }
 
 // 创建遍历上下文对象
