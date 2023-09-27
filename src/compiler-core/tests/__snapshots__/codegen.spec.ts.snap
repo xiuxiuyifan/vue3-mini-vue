@@ -1,3 +1,11 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`codegen string 1`] = `"function render(_ctx, _catch){return 'hi'}"`;
+exports[`codegen interpolation 1`] = `
+"import { toDisplayString as _toDisplayString} } from vue
+function render(_ctx, _catch){return _toDisplayString(_ctx.message)}"
+`;
+
+exports[`codegen string 1`] = `
+"
+function render(_ctx, _catch){return 'hi'}"
+`;

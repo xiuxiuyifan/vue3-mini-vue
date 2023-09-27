@@ -1,3 +1,6 @@
+import { NodeTypes } from "./ast";
+import { TO_DISPLAY_STRING } from "./runtimeHelpers";
+
 /**
  *
  * @param root 根节点
@@ -10,6 +13,8 @@ export function transform(root, options = {}) {
   traverseNode(root, context);
   // 返回出用来 生成代码的 ast
   createRootCodegen(root);
+
+  root.helpers = [...context.helpers.keys()];
 }
 
 function createRootCodegen(root: any) {
@@ -21,6 +26,10 @@ function createTransformContext(root: any, options: any) {
   const context = {
     root,
     nodeTransforms: options.nodeTransforms || [],
+    helpers: new Map(),
+    helper(key) {
+      context.helpers.set(key, 1);
+    },
   };
 
   return context;
@@ -38,7 +47,17 @@ function traverseNode(node, context) {
     transform(node);
   }
 
-  traverseChildren(node, context);
+  switch (node.type) {
+    case NodeTypes.INTERPOLATION:
+      context.helper(TO_DISPLAY_STRING);
+      break;
+    case NodeTypes.ROOT:
+    case NodeTypes.ELEMENT:
+      traverseChildren(node, context);
+      break;
+    default:
+      break;
+  }
 }
 
 // 遍历孩子
