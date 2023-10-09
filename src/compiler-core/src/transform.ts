@@ -18,7 +18,12 @@ export function transform(root, options = {}) {
 }
 
 function createRootCodegen(root: any) {
-  root.codegenNode = root.children[0];
+  const child = root.children[0];
+  if (child.type === NodeTypes.ELEMENT) {
+    root.codegenNode = child.codegenNode;
+  } else {
+    root.codegenNode = root.children[0];
+  }
 }
 
 // 创建遍历上下文对象
@@ -40,11 +45,15 @@ function traverseNode(node, context) {
   // 先遍历根节点，然后遍历儿子
   // 取出 用户传递的 options 里面的参数
   const nodeTransforms = context.nodeTransforms;
+  const exitFns: any = [];
 
   for (let i = 0; i < nodeTransforms.length; i++) {
     // 调用用户的函数 ， 把 node 交给用户进行处理
     const transform = nodeTransforms[i];
-    transform(node);
+    const onExit = transform(node, context);
+    if (onExit) {
+      exitFns.push(onExit);
+    }
   }
 
   switch (node.type) {
@@ -57,6 +66,11 @@ function traverseNode(node, context) {
       break;
     default:
       break;
+  }
+
+  let i = exitFns.length;
+  while (i--) {
+    exitFns[i]();
   }
 }
 

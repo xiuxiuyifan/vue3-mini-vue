@@ -2,6 +2,8 @@ export const extend = Object.assign;
 
 export const isObject = (obj: any) => obj !== null && typeof obj === "object";
 
+export const isString = (value) => typeof value === "string";
+
 //  把 add  转换成  Add
 export const capitalize = (str: string) =>
   str.charAt(0).toUpperCase() + str.slice(1);
