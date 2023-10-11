@@ -121,7 +121,10 @@ export function createRenderer(options) {
           console.log("初始化");
           const { proxy } = instance;
           // 拿到组件内部  render 函数返回的虚拟节点
-          const subTree = (instance.subTree = instance.render.call(proxy));
+          const subTree = (instance.subTree = instance.render.call(
+            proxy,
+            proxy
+          ));
 
           // vnode -> patch
           // vnode -> element -> mountElement
@@ -140,7 +143,7 @@ export function createRenderer(options) {
           }
           const { proxy } = instance;
           // 最新的 subTree
-          const subTree = instance.render.call(proxy);
+          const subTree = instance.render.call(proxy, proxy);
           // 获取老的 subTree
           const prevSubTree = instance.subTree;
           // 更新老的 subTree

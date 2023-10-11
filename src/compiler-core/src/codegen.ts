@@ -42,19 +42,18 @@ function render(_ctx, _cache) {
 
 function genFunctionPreamble(ast, context) {
   const { push } = context;
-  const VueBinging = "vue";
+  const VueBinging = "Vue";
 
-  const aliasHelper = (s) => `${helperMapName[s]} as _${helperMapName[s]}}`;
+  const aliasHelper = (s) => `${helperMapName[s]}: _${helperMapName[s]}`;
 
   // 如果有 helpers 的时候在添加 导入 helpers
   if (ast.helpers.length > 0) {
     push(
-      `import { ${ast.helpers
-        .map(aliasHelper)
-        .join(", ")} } from '${VueBinging}'`
+      `const { ${ast.helpers.map(aliasHelper).join(", ")} } = ${VueBinging}`
     );
   }
   push("\n");
+  push("return ");
 }
 
 /**
